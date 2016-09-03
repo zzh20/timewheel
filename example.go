@@ -17,3 +17,11 @@ func main() {
 	wheelHeartbeat.Start()
 	<-ch
 }
+
+// 连接建立完成后，连接对象加入时间轮中
+//wheelHeartbeat.Add(conn)
+
+// 收到客户端发送的心跳包后，连接对象加入时间轮中
+//wheelHeartbeat.Add(conn)
+
+
