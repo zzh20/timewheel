@@ -1,3 +1,4 @@
+/*
 package main
 
 import (
@@ -24,4 +25,4 @@ func main() {
 // 收到客户端发送的心跳包后，连接对象加入时间轮中,更新连接的超时时间
 //wheelHeartbeat.Add(conn)
 
-
+*/
