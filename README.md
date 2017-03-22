@@ -44,6 +44,7 @@ import (
   
   "github.com/zzh20/timewheel"
 )
+
 // 定义心跳包，设置心跳超时时间，处理函数
 var wheelHeartbeat = timewheel.New(time.Second*1, 30, func(data interface{}) {
 	c := data.(net.Conn)
