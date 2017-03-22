@@ -25,3 +25,47 @@ timewheel算法，只需要启动一个定时器，所有定时任务加入相�
     新加入的对象总是保存在当前指针转动方向上一个位置
     相等的对象仅存在于一个 slot 中
     指针转动到当前位置对应的 slot 中保存的对象就意味着 timeout 了
+    
+
+使用
+
+go get -u github.com/zzh20/timewheel
+
+例子
+
+package main
+
+import (
+  "net"
+  "log"
+  
+  "github.com/zzh20/timewheel"
+)
+// 定义心跳包，设置心跳超时时间，处理函数
+var wheelHeartbeat = timewheel.New(time.Second*1, 30, func(data interface{}) {
+	c := data.(net.Conn)
+	log.Printf("timeout close conn:%v", c)
+	c.Close()
+})
+
+func main() {
+
+  // 启动心跳包检查
+  wheelHeartbeat.Start()
+  
+}
+
+// 客户端连接成功 
+func SessionConnected() {
+    wheelHeartbeat.Add(conn)
+}
+
+// 客户端连接断开
+func SessionClosed() {
+    wheelHeartbeat.Remove(conn))
+}
+
+// 处理客户端的心跳包
+func HeartbeatHandler() {
+  wheelHeartbeat.Add(conn)
+}
