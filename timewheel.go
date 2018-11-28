@@ -1,7 +1,6 @@
 package timewheel
 
 import (
-	"net"
 	"sync"
 	"time"
 )
