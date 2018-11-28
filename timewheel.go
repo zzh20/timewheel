@@ -115,11 +115,10 @@ func (t *TimeWheel) run() {
 
 			t.currentTickIndex++
 		case v := <-t.taskChan:
-			c := v.(net.Conn)
-			t.Remove(c)
+			t.Remove(v)
 			slot := t.wheel[t.getPreviousTickIndex()]
-			slot.add(c)
-			t.indicator[c] = slot
+			slot.add(v)
+			t.indicator[v] = slot
 		}
 	}
 }
