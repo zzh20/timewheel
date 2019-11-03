@@ -10,6 +10,11 @@ type slot struct {
 	elements map[interface{}]interface{}
 }
 
+type element struct {
+	v             interface{}
+	remainingTime int
+}
+
 func newSlot(id int) *slot {
 	s := &slot{id: id}
 	s.elements = make(map[interface{}]interface{})
@@ -69,8 +74,8 @@ func (t *TimeWheel) Start() {
 	go t.run()
 }
 
-func (t *TimeWheel) Add(c interface{}) {
-	t.taskChan <- c
+func (t *TimeWheel) Add(c interface{}, remainingTime int) {
+	t.taskChan <- &element{c,remainingTime}
 }
 
 func (t *TimeWheel) Remove(c interface{}) {
@@ -114,10 +119,23 @@ func (t *TimeWheel) run() {
 
 			t.currentTickIndex++
 		case v := <-t.taskChan:
-			t.Remove(v)
-			slot := t.wheel[t.getPreviousTickIndex()]
-			slot.add(v)
-			t.indicator[v] = slot
+			element,ok := v.(*element)
+			if !ok {
+				return
+			}
+			t.Remove(element.v)
+			idx := t.getPreviousTickIndex()
+			if element.remainingTime > 0 {
+				tickRemaing := t.ticksPerWheel - idx
+				if element.remainingTime <= tickRemaing {
+					idx += element.remainingTime
+				} else {
+					idx = element.remainingTime - tickRemaing
+				}
+			}
+			slot := t.wheel[idx]
+			slot.add(element.v)
+			t.indicator[element.v] = slot
 		}
 	}
 }
