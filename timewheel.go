@@ -74,7 +74,11 @@ func (t *TimeWheel) Start() {
 	go t.run()
 }
 
-func (t *TimeWheel) Add(c interface{}, remainingTime int) {
+func (t *TimeWheel) Add(c interface{}) {
+	t.taskChan <- &element{c,t.ticksPerWheel-1}
+}
+
+func (t *TimeWheel) AddWithRemainingTime(c interface{}, remainingTime int) {
 	t.taskChan <- &element{c,remainingTime}
 }
 
@@ -83,16 +87,10 @@ func (t *TimeWheel) Remove(c interface{}) {
 		v.remove(c)
 	}
 }
-
-func (t *TimeWheel) getPreviousTickIndex() int {
+func (t *TimeWheel) getCurrentTickIndex() int {
 	t.RLock()
 	defer t.RUnlock()
-
-	cti := t.currentTickIndex
-	if 0 == cti {
-		return t.ticksPerWheel - 1
-	}
-	return cti - 1
+	return t.currentTickIndex
 }
 
 func (t *TimeWheel) Stop() {
@@ -124,16 +122,13 @@ func (t *TimeWheel) run() {
 				return
 			}
 			t.Remove(element.v)
-			idx := t.getPreviousTickIndex()
-			if element.remainingTime > 0 {
-				tickRemaing := t.ticksPerWheel - idx
-				if element.remainingTime <= tickRemaing {
-					idx += element.remainingTime
-				} else {
-					idx = element.remainingTime - tickRemaing
-				}
+
+			elementIdx := t.getCurrentTickIndex()+element.remainingTime
+			if elementIdx > t.ticksPerWheel {
+				elementIdx = elementIdx - t.ticksPerWheel
 			}
-			slot := t.wheel[idx]
+			elementIdx--
+			slot := t.wheel[elementIdx]
 			slot.add(element.v)
 			t.indicator[element.v] = slot
 		}
