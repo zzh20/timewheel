@@ -83,6 +83,9 @@ func (t *TimeWheel) AddWithRemainingTime(c interface{}, remainingTime int) {
 }
 
 func (t *TimeWheel) Remove(c interface{}) {
+	t.Lock()
+	defer t.Unlock()
+	
 	if v, ok := t.indicator[c]; ok {
 		v.remove(c)
 	}
